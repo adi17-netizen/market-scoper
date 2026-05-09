@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Scoper</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0a09; --card: #1c1917; --bdr: #292524; --pri: #fafaf9;
+    --txt: #d6d3d1; --mut: #78716c; --fnt: #57534e; --inp-bg: #292524;
+    --inp-bdr: #44403c; --inp-txt: #d6d3d1; --accent: #f59e0b;
+    --accent-dim: rgba(245,158,11,0.1); --tog-on-bg: #fafaf9; --tog-on-txt: #0c0a09;
+    --mode-on-bg: #f59e0b; --mode-on-txt: #0c0a09; --hover-row: rgba(41,37,36,0.5);
+    --pre-on-bdr: #f59e0b; --pre-off-bdr: #44403c;
+  }
+  [data-theme="light"] {
+    --bg: #fafaf9; --card: #ffffff; --bdr: #e7e5e4; --pri: #1c1917;
+    --txt: #44403c; --mut: #78716c; --fnt: #a8a29e; --inp-bg: #f5f5f4;
+    --inp-bdr: #d6d3d1; --inp-txt: #44403c; --accent: #d97706;
+    --accent-dim: rgba(217,119,6,0.08); --tog-on-bg: #1c1917; --tog-on-txt: #fff;
+    --mode-on-bg: #f59e0b; --mode-on-txt: #fff; --hover-row: rgba(245,245,244,0.8);
+    --pre-on-bdr: #d97706; --pre-off-bdr: #d6d3d1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--txt); padding: 1.5rem; transition: background .3s, color .3s; min-height: 100vh; }
+  .mx { max-width: 56rem; margin: 0 auto; }
+  .card { background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; }
+  .flex { display: flex; } .wrap { flex-wrap: wrap; } .between { justify-content: space-between; }
+  .items-center { align-items: center; } .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; } .gap-4 { gap: 1rem; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+  @media(min-width:640px) { .grid4 { grid-template-columns: repeat(4, 1fr); } .grid3 { grid-template-columns: repeat(3,1fr); } }
+  .grid3 { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+  @media(min-width:640px) { .grid3 { grid-template-columns: repeat(3,1fr); } }
+  h1 { font-size: 1.75rem; font-weight: 700; color: var(--pri); letter-spacing: -0.02em; }
+  .sub { color: var(--mut); font-size: .8rem; }
+  .lbl { color: var(--mut); font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+  .val-lg { color: var(--pri); font-size: 1.1rem; font-weight: 700; }
+  .val-sm { color: var(--fnt); font-size: .7rem; }
+
+  /* Buttons & toggles */
+  .pill-group { display: inline-flex; gap: 2px; background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 3px; }
+  .pill { padding: 6px 12px; border-radius: 6px; font-size: .7rem; font-weight: 700; border: none; cursor: pointer; background: transparent; color: var(--mut); font-family: inherit; transition: all .2s; }
+  .pill.on { background: var(--tog-on-bg); color: var(--tog-on-txt); }
+  .pill-mode { padding: 8px 16px; border-radius: 6px; font-size: .75rem; font-weight: 700; border: none; cursor: pointer; background: transparent; color: var(--mut); font-family: inherit; transition: all .2s; }
+  .pill-mode.on { background: var(--mode-on-bg); color: var(--mode-on-txt); }
+  .preset { padding: 4px 12px; border-radius: 999px; font-size: .65rem; font-weight: 700; border: 1px solid var(--pre-off-bdr); background: transparent; color: var(--mut); cursor: pointer; font-family: inherit; transition: all .2s; }
+  .preset.on { border-color: var(--pre-on-bdr); background: var(--accent-dim); color: var(--accent); }
+  .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: .7rem; font-weight: 600; border: 1px solid var(--inp-bdr); background: var(--inp-bg); color: var(--mut); cursor: pointer; font-family: inherit; }
+
+  /* Inputs */
+  input[type="text"], input[type="number"], select {
+    background: var(--inp-bg); border: 1px solid var(--inp-bdr); border-radius: 8px;
+    padding: 6px 12px; font-size: .75rem; color: var(--inp-txt); font-family: inherit;
+    font-weight: 600; outline: none; transition: border .2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  .big-input { background: transparent; border: none; font-size: 2rem; font-weight: 700; color: var(--pri); width: 100%; outline: none; font-family: inherit; }
+  @media(min-width:640px) { .big-input { font-size: 2.5rem; } }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  th { text-align: left; color: var(--mut); font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: .75rem 1rem; border-bottom: 1px solid var(--bdr); }
+  th.r { text-align: right; }
+  td { padding: .7rem 1rem; border-bottom: 1px solid var(--bdr); }
+  td.r { text-align: right; }
+  tr:hover { background: var(--hover-row); }
+  tr.custom { background: var(--accent-dim); }
+
+  /* Heat badges */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: .7rem; font-weight: 700; }
+  .h1 { background: #d1fae5; color: #065f46; } .h2 { background: #ecfdf5; color: #065f46; }
+  .h3 { background: #f0f9ff; color: #0369a1; } .h4 { background: #fffbeb; color: #92400e; }
+  .h5 { background: #fff7ed; color: #9a3412; } .h6 { background: #fef2f2; color: #991b1b; }
+  .f1 { color: #059669; } .f2 { color: #10b981; } .f3 { color: #0284c7; }
+  .f4 { color: #d97706; } .f5 { color: #ea580c; } .f6 { color: #dc2626; }
+
+  .collapse-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: none; border: none; color: var(--mut); cursor: pointer; font-family: inherit; }
+  .section { padding: 0 1rem 1.25rem; }
+  .divider { border-top: 1px solid var(--bdr); padding-top: 1rem; margin-top: 1rem; }
+  .arrow { font-size: .7rem; color: var(--fnt); font-weight: 700; }
+  .hide { display: none; }
+  .legend { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .65rem; color: var(--fnt); padding-bottom: 2rem; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+  .sweet { color: #10b981; font-weight: 700; }
+  .warn { color: #f59e0b; font-weight: 700; }
+  a.skip { display: none; }
+  .rate-row { display: flex; align-items: center; gap: .5rem; background: var(--inp-bg); border: 1px solid var(--inp-bdr); border-radius: 8px; padding: 6px 12px; }
+  .rate-row input { background: transparent; border: none; width: 5rem; font-size: .8rem; }
+  .freq-group { display: flex; flex-wrap: wrap; gap: 4px; }
+  .freq-pill { padding: 5px 10px; border-radius: 6px; font-size: .65rem; font-weight: 700; border: 1px solid var(--inp-bdr); background: transparent; color: var(--mut); cursor: pointer; font-family: inherit; transition: all .2s; }
+  .freq-pill.on { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  @media(max-width:639px) { .hide-mobile { display: none !important; } }
+</style>
+</head>
+<body>
+<div class="mx" id="app"></div>
+
+<script>
+const CURR = {
+  INR: { sym: "₹", code: "INR", loc: "en-IN" },
+  USD: { sym: "$", code: "USD", loc: "en-US" },
+  GBP: { sym: "£", code: "GBP", loc: "en-GB" },
+  EUR: { sym: "€", code: "EUR", loc: "de-DE" },
+};
+
+const FREQ = {
+  weekly:    { label: "Weekly",    mult: 52/12, per: "/ week" },
+  biweekly:  { label: "Bi-weekly", mult: 26/12, per: "/ 2 weeks" },
+  monthly:   { label: "Monthly",   mult: 1,     per: "/ month" },
+  quarterly: { label: "Quarterly", mult: 1/3,   per: "/ quarter" },
+  halfyearly:{ label: "Half-yearly", mult: 1/6, per: "/ 6 months" },
+  annual:    { label: "Annual",    mult: 1/12,  per: "/ year" },
+  onetime:   { label: "One-time",  mult: 1/12,  per: " (one-time)" },
+};
+
+const MONTHLY_PRICES_INR = [100,250,499,999,1499,1999,2999,4999,9999,14999,24999,49999];
+const LUMPSUM_PRICES_INR = [499,999,2499,4999,9999,19999,49999,99999,199999,499999];
+const PRESETS_INR = {
+  monthly: [{l:"₹25K/mo",v:25000},{l:"₹50K/mo",v:50000},{l:"₹1L/mo",v:100000},{l:"₹2.5L/mo",v:250000},{l:"₹5L/mo",v:500000},{l:"₹10L/mo",v:1000000}],
+  annual: [{l:"₹5L/yr",v:500000},{l:"₹10L/yr",v:1000000},{l:"₹25L/yr",v:2500000},{l:"₹50L/yr",v:5000000},{l:"₹1Cr/yr",v:10000000},{l:"₹5Cr/yr",v:50000000}],
+};
+
+let state = {
+  theme: "dark", mode: "monthly", freq: "monthly", cur: "INR",
+  targetINR: 50000, inputVal: "50000",
+  rates: { INR:1, USD:85, GBP:110, EUR:95 },
+  customPrices: [], customInput: "",
+  showFx: false,
+  convFrom: "USD", convTo: "INR", convAmt: "1000",
+};
+
+const $ = s => document.querySelector(s);
+const toINR = (v,c) => v * state.rates[c];
+const fromINR = (v,c) => v / state.rates[c];
+
+function fmt(val, cur) {
+  const cm = CURR[cur];
+  if (val>=1e7 && cur==="INR") return cm.sym+(val/1e7).toFixed(2)+" Cr";
+  if (val>=1e5 && cur==="INR") return cm.sym+(val/1e5).toFixed(2)+" L";
+  if (val>=1e6) return cm.sym+(val/1e6).toFixed(1)+"M";
+  if (val>=1e3) return cm.sym+(val/1e3).toFixed(val>=1e4?0:1)+"K";
+  return cm.sym+Math.round(val).toLocaleString(cm.loc);
+}
+function fmtF(val,cur) { return CURR[cur].sym+Math.round(val).toLocaleString(CURR[cur].loc); }
+
+function heatCls(n) { return n<=5?"h1":n<=20?"h2":n<=50?"h3":n<=100?"h4":n<=500?"h5":"h6"; }
+function feasCls(n) { return n<=5?"f1":n<=20?"f2":n<=50?"f3":n<=100?"f4":n<=500?"f5":"f6"; }
+function feasLbl(n) { return n<=5?"Very doable":n<=20?"Doable":n<=50?"Moderate":n<=100?"Ambitious":n<=500?"Hard":"Very hard"; }
+
+function render() {
+  const s = state, c = CURR[s.cur], target = fromINR(s.targetINR, s.cur);
+  const freqObj = FREQ[s.freq];
+  const basePrices = s.mode === "monthly" ? MONTHLY_PRICES_INR : LUMPSUM_PRICES_INR;
+  const allPrices = [...basePrices, ...s.customPrices].sort((a,b)=>a-b);
+
+  // Each row: price is per-frequency-unit. Revenue target is monthly internally.
+  // For recurring: pricePerMonth = pricePerFreq * freq.mult. customers = targetINR / pricePerMonth
+  // For lump sum: customers = targetINR(annual) / priceINR
+  const rows = allPrices.map(priceINR => {
+    let customers;
+    if (s.mode === "monthly") {
+      const pricePerMonth = priceINR * freqObj.mult;
+      customers = Math.ceil(s.targetINR / pricePerMonth);
+    } else {
+      customers = Math.ceil(s.targetINR / priceINR);
+    }
+    return { priceINR, priceDisp: fromINR(priceINR, s.cur), customers, isCustom: s.customPrices.includes(priceINR) };
+  });
+
+  const monthlyEquiv = s.mode === "annual" ? s.targetINR / 12 : null;
+  const convNum = parseFloat((s.convAmt||"0").replace(/,/g,""));
+  const convResult = !isNaN(convNum) ? (convNum * s.rates[s.convFrom]) / s.rates[s.convTo] : 0;
+
+  const presets = PRESETS_INR[s.mode];
+
+  document.documentElement.setAttribute("data-theme", s.theme);
+
+  let html = `
+  <!-- HEADER -->
+  <div class="flex between wrap gap-4" style="margin-bottom:2rem">
+    <div>
+      <h1>Market Scoper</h1>
+      <p class="sub">Revenue → Customers × Price breakdown</p>
+    </div>
+    <div class="flex items-center gap-3 wrap">
+      <button class="btn-sm" onclick="toggleTheme()">${s.theme==="dark"?"☀ Light":"● Dark"}</button>
+      <div class="pill-group">
+        ${Object.keys(CURR).map(k=>`<button class="pill ${s.cur===k?"on":""}" onclick="setCur('${k}')">${CURR[k].sym} ${k}</button>`).join("")}
+      </div>
+    </div>
+  </div>
+
+  <!-- FX PANEL -->
+  <div class="card" style="margin-bottom:1.5rem">
+    <button class="collapse-btn" onclick="toggleFx()">
+      <span class="lbl" style="margin:0">FX Rates & Converter</span>
+      <span class="arrow">${s.showFx?"▲ hide":"▼ show"}</span>
+    </button>
+    <div class="${s.showFx?"section":"hide"}">
+      <p class="val-sm" style="margin-bottom:.75rem">INR per 1 unit — edit to match today's rate. Flows into all calculations.</p>
+      <div class="grid3">
+        ${Object.keys(CURR).filter(k=>k!=="INR").map(k=>`
+          <div class="rate-row">
+            <span class="lbl" style="white-space:nowrap">1 ${k} =</span>
+            <span style="color:var(--fnt);font-size:.75rem">₹</span>
+            <input type="number" value="${s.rates[k]}" step="0.01" onchange="setRate('${k}',this.value)">
+          </div>
+        `).join("")}
+      </div>
+      <div class="divider">
+        <p class="lbl" style="margin-bottom:.75rem">Quick Convert</p>
+        <div class="flex wrap items-center gap-2">
+          <input type="text" value="${s.convAmt}" oninput="state.convAmt=this.value;render()" style="width:7rem">
+          <select onchange="state.convFrom=this.value;render()">
+            ${Object.keys(CURR).map(k=>`<option value="${k}" ${s.convFrom===k?"selected":""}>${k}</option>`).join("")}
+          </select>
+          <span style="color:var(--fnt);font-weight:700">→</span>
+          <select onchange="state.convTo=this.value;render()">
+            ${Object.keys(CURR).map(k=>`<option value="${k}" ${s.convTo===k?"selected":""}>${k}</option>`).join("")}
+          </select>
+          <span style="font-size:1.1rem;font-weight:700;color:var(--pri)">= ${fmtF(Math.round(convResult*100)/100, s.convTo)}</span>
+        </div>
+        <p class="val-sm" style="margin-top:.5rem">Rate: 1 ${s.convFrom} = ${(s.rates[s.convFrom]/s.rates[s.convTo]).toFixed(4)} ${s.convTo}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE TOGGLE -->
+  <div class="pill-group" style="margin-bottom:1.5rem">
+    <button class="pill-mode ${s.mode==="monthly"?"on":""}" onclick="setMode('monthly')">Monthly Recurring</button>
+    <button class="pill-mode ${s.mode==="annual"?"on":""}" onclick="setMode('annual')">Annual / Lump Sum</button>
+  </div>
+
+  <!-- PRICING FREQUENCY (only for recurring) -->
+  ${s.mode === "monthly" ? `
+  <div class="card" style="padding:1rem;margin-bottom:1.5rem">
+    <p class="lbl" style="margin-bottom:.5rem">Pricing Frequency</p>
+    <p class="val-sm" style="margin-bottom:.75rem">How often does the customer pay? Price tiers below are per this period.</p>
+    <div class="freq-group">
+      ${Object.keys(FREQ).filter(k=>k!=="onetime").map(k=>`<button class="freq-pill ${s.freq===k?"on":""}" onclick="setFreq('${k}')">${FREQ[k].label}</button>`).join("")}
+    </div>
+  </div>` : ""}
+
+  <!-- TARGET INPUT -->
+  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+    <p class="lbl" style="margin-bottom:.75rem">${s.mode==="monthly"?"Target Monthly Revenue":"Target Annual Revenue"}</p>
+    <div class="flex items-center gap-3">
+      <span style="font-size:1.5rem;color:var(--fnt);font-weight:700">${c.sym}</span>
+      <input class="big-input" type="text" value="${s.inputVal}" oninput="handleTarget(this.value)">
+      <span style="color:var(--fnt);font-size:.8rem;white-space:nowrap">${s.mode==="monthly"?"/ month":"/ year"}</span>
+    </div>
+    ${s.mode==="annual" && monthlyEquiv ? `
+    <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bdr)">
+      <span class="sub">= ${fmtF(fromINR(monthlyEquiv,s.cur),s.cur)} <span style="color:var(--fnt)">/ month</span></span>
+    </div>` : ""}
+    <div class="flex wrap gap-2" style="margin-top:1rem">
+      ${presets.map(p=>`<button class="preset ${s.targetINR===p.v?"on":""}" onclick="applyPreset(${p.v})">${s.cur==="INR"?p.l:fmt(fromINR(p.v,s.cur),s.cur)+(s.mode==="monthly"?"/mo":"/yr")}</button>`).join("")}
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="grid4" style="margin-bottom:1.5rem">
+    <div class="card" style="padding:.75rem">
+      <div class="lbl">Target</div>
+      <div class="val-lg">${fmtF(target,s.cur)}</div>
+      <div class="val-sm">${s.mode==="monthly"?"per month":"per year"}</div>
+    </div>
+    <div class="card" style="padding:.75rem">
+      <div class="lbl">In INR</div>
+      <div class="val-lg">${fmt(s.targetINR,"INR")}</div>
+      <div class="val-sm">${s.cur!=="INR"?"@ ₹"+s.rates[s.cur]+"/"+c.code:"base"}</div>
+    </div>
+    <div class="card" style="padding:.75rem">
+      <div class="lbl">${s.mode==="monthly"?"Annual":"Monthly"}</div>
+      <div class="val-lg">${fmt(fromINR(s.mode==="monthly"?s.targetINR*12:s.targetINR/12,s.cur),s.cur)}</div>
+      <div class="val-sm">${s.mode==="monthly"?"per year":"per month"}</div>
+    </div>
+    <div class="card" style="padding:.75rem">
+      <div class="lbl">Daily Equiv.</div>
+      <div class="val-lg">${fmt(fromINR(s.mode==="monthly"?s.targetINR/30:s.targetINR/365,s.cur),s.cur)}</div>
+      <div class="val-sm">per day</div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN TABLE -->
+  <div class="card" style="margin-bottom:1.5rem;overflow:hidden">
+    <div style="padding:1rem;border-bottom:1px solid var(--bdr)" class="flex between wrap gap-3">
+      <div>
+        <div class="val-lg" style="font-size:.85rem">${s.mode==="monthly"? (s.freq==="monthly"?"Monthly Subscription Pricing":FREQ[s.freq].label+" Subscription Pricing") :"One-Time / Annual Pricing"}</div>
+        <p class="val-sm" style="margin-top:2px">Customers needed at each price point to hit ${fmt(target,s.cur)}${s.mode==="monthly"?"/mo":"/yr"}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="text" placeholder="Custom (${c.sym})" value="${s.customInput}" oninput="state.customInput=this.value" onkeydown="if(event.key==='Enter')addCustom()" style="width:7rem">
+        <button class="btn-sm" onclick="addCustom()">Add</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>Price ${s.mode==="monthly"?FREQ[s.freq].per:"/ unit"}</th>
+          <th class="r">Customers</th>
+          <th class="r hide-mobile">Feasibility</th>
+          ${s.mode==="monthly" && s.freq!=="monthly" ? `<th class="r hide-mobile">Effective /mo</th>` : ""}
+          <th class="r hide-mobile">${s.mode==="monthly"?"Annual Rev.":"Rev. / Cust."}</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map(r=>{
+            const fc = feasCls(r.customers);
+            const effectiveMonthly = r.priceINR * freqObj.mult;
+            return `<tr class="${r.isCustom?"custom":""}">
+              <td><strong style="color:var(--pri)">${fmtF(r.priceDisp,s.cur)}</strong>${r.isCustom?` <span style="color:var(--accent);font-size:.7rem">★</span>`:""}</td>
+              <td class="r"><span class="badge ${heatCls(r.customers)}">${r.customers.toLocaleString()}</span></td>
+              <td class="r hide-mobile"><span class="${fc}" style="font-size:.7rem;font-weight:700">${feasLbl(r.customers)}</span></td>
+              ${s.mode==="monthly" && s.freq!=="monthly" ? `<td class="r hide-mobile" style="color:var(--mut);font-size:.7rem">${fmt(fromINR(effectiveMonthly,s.cur),s.cur)}</td>` : ""}
+              <td class="r hide-mobile" style="color:var(--mut);font-size:.7rem">${s.mode==="monthly"? fmt(fromINR(effectiveMonthly*r.customers*12,s.cur),s.cur) : fmtF(r.priceDisp,s.cur)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INSIGHT -->
+  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
+    <p class="lbl" style="margin-bottom:.75rem">Quick Insight</p>
+    <div style="font-size:.8rem;color:var(--txt)">
+      ${rows.filter(r=>r.customers<=10).length>0 ? `
+        <p><span class="sweet">Sweet spot:</span> At ${fmtF(rows.filter(r=>r.customers<=10).slice(-1)[0]?.priceDisp,s.cur)}+${s.mode==="monthly"?FREQ[s.freq].per:""} per ${s.mode==="monthly"?"subscription":"sale"}, you need <strong style="color:var(--pri)">≤10 customers</strong> to hit target.${s.mode==="monthly"?" Very achievable for a focused micro-SaaS.":""}</p>
+      ` : `
+        <p><span class="warn">High volume needed:</span> Even at the highest price point, you'd need ${rows[rows.length-1]?.customers}+ customers.</p>
+      `}
+      ${s.cur!=="INR"?`<p class="val-sm" style="margin-top:.5rem">Using: 1 ${c.code} = ₹${s.rates[s.cur]} (editable in FX panel)</p>`:""}
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <span><i class="h1"></i> ≤5</span>
+    <span><i class="h2"></i> 6-20</span>
+    <span><i class="h3"></i> 21-50</span>
+    <span><i class="h4"></i> 51-100</span>
+    <span><i class="h5"></i> 101-500</span>
+    <span><i class="h6"></i> 500+</span>
+  </div>`;
+
+  document.getElementById("app").innerHTML = html;
+}
+
+function toggleTheme() { state.theme = state.theme==="dark"?"light":"dark"; render(); }
+function toggleFx() { state.showFx = !state.showFx; render(); }
+function setCur(c) { state.cur=c; state.inputVal=Math.round(fromINR(state.targetINR,c)).toString(); render(); }
+function setMode(m) { state.mode=m; state.freq = m==="monthly"?"monthly":"onetime"; applyPreset(m==="monthly"?50000:1000000); }
+function setFreq(f) { state.freq=f; render(); }
+function handleTarget(v) { state.inputVal=v; const n=parseFloat(v.replace(/,/g,"")); if(!isNaN(n)&&n>0) state.targetINR=toINR(n,state.cur); render(); }
+function applyPreset(v) { state.targetINR=v; state.inputVal=Math.round(fromINR(v,state.cur)).toString(); render(); }
+function setRate(c,v) { const n=parseFloat(v); if(!isNaN(n)&&n>0){ state.rates[c]=n; if(c===state.cur) state.inputVal=Math.round(state.targetINR/n).toString(); } render(); }
+function addCustom() {
+  const n=parseFloat((state.customInput||"").replace(/,/g,""));
+  if(!isNaN(n)&&n>0){ const p=toINR(n,state.cur); if(!state.customPrices.includes(p)) state.customPrices.push(p); state.customInput=""; }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
