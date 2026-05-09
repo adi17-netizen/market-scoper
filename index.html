@@ -1,369 +1,335 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-t="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Market Scoper</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0c0a09; --card: #1c1917; --bdr: #292524; --pri: #fafaf9;
-    --txt: #d6d3d1; --mut: #78716c; --fnt: #57534e; --inp-bg: #292524;
-    --inp-bdr: #44403c; --inp-txt: #d6d3d1; --accent: #f59e0b;
-    --accent-dim: rgba(245,158,11,0.1); --tog-on-bg: #fafaf9; --tog-on-txt: #0c0a09;
-    --mode-on-bg: #f59e0b; --mode-on-txt: #0c0a09; --hover-row: rgba(41,37,36,0.5);
-    --pre-on-bdr: #f59e0b; --pre-off-bdr: #44403c;
-  }
-  [data-theme="light"] {
-    --bg: #fafaf9; --card: #ffffff; --bdr: #e7e5e4; --pri: #1c1917;
-    --txt: #44403c; --mut: #78716c; --fnt: #a8a29e; --inp-bg: #f5f5f4;
-    --inp-bdr: #d6d3d1; --inp-txt: #44403c; --accent: #d97706;
-    --accent-dim: rgba(217,119,6,0.08); --tog-on-bg: #1c1917; --tog-on-txt: #fff;
-    --mode-on-bg: #f59e0b; --mode-on-txt: #fff; --hover-row: rgba(245,245,244,0.8);
-    --pre-on-bdr: #d97706; --pre-off-bdr: #d6d3d1;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--txt); padding: 1.5rem; transition: background .3s, color .3s; min-height: 100vh; }
-  .mx { max-width: 56rem; margin: 0 auto; }
-  .card { background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; }
-  .flex { display: flex; } .wrap { flex-wrap: wrap; } .between { justify-content: space-between; }
-  .items-center { align-items: center; } .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; } .gap-4 { gap: 1rem; }
-  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
-  .grid4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
-  @media(min-width:640px) { .grid4 { grid-template-columns: repeat(4, 1fr); } .grid3 { grid-template-columns: repeat(3,1fr); } }
-  .grid3 { display: grid; grid-template-columns: 1fr; gap: .75rem; }
-  @media(min-width:640px) { .grid3 { grid-template-columns: repeat(3,1fr); } }
-  h1 { font-size: 1.75rem; font-weight: 700; color: var(--pri); letter-spacing: -0.02em; }
-  .sub { color: var(--mut); font-size: .8rem; }
-  .lbl { color: var(--mut); font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
-  .val-lg { color: var(--pri); font-size: 1.1rem; font-weight: 700; }
-  .val-sm { color: var(--fnt); font-size: .7rem; }
+:root{--bg:#171721;--raised:#1e1e2a;--surface:#272735;--bdr:#333340;--pri:#ededf3;--txt:#c3c3cc;--mut:#70707d;--faint:#3e3e4d;--acc:#5266eb;--acc-soft:rgba(82,102,235,.1);--acc-med:rgba(82,102,235,.18);--ghost:rgba(205,221,255,.15);--inp-bg:#1b1b28;--inp-bdr:#33334a;--bg1:#b9e8b9;--bt1:#1a6e1a;--bg2:#d5f0d5;--bt2:#2a7a2a;--bgb:#b8d4f0;--btb:#1055a0;--bgy:#fff3b0;--bty:#b06a00;--bgo:#ffd9a8;--bto:#c04a00;--bgr:#ffc0c0;--btr:#a82020}
+[data-t="light"]{--bg:#f4f3f0;--raised:#fff;--surface:#f0eff0;--bdr:#dddde5;--pri:#1e1e2a;--txt:#5a5a6e;--mut:#8888a0;--faint:#d0d0dd;--acc:#4a5ad0;--acc-soft:rgba(74,90,208,.06);--acc-med:rgba(74,90,208,.1);--ghost:rgba(74,90,208,.08);--inp-bg:#eeeef2;--inp-bdr:#d8d8e2}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Outfit',system-ui,sans-serif;font-weight:400;letter-spacing:.005em;min-height:100vh;transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+.page{max-width:620px;margin:0 auto;padding:0 1.5rem 5rem}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.a{animation:rise .4s ease-out both}.d1{animation-delay:.03s}.d2{animation-delay:.08s}.d3{animation-delay:.14s}.d4{animation-delay:.2s}.d5{animation-delay:.26s}.d6{animation-delay:.32s}
 
-  /* Buttons & toggles */
-  .pill-group { display: inline-flex; gap: 2px; background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 3px; }
-  .pill { padding: 6px 12px; border-radius: 6px; font-size: .7rem; font-weight: 700; border: none; cursor: pointer; background: transparent; color: var(--mut); font-family: inherit; transition: all .2s; }
-  .pill.on { background: var(--tog-on-bg); color: var(--tog-on-txt); }
-  .pill-mode { padding: 8px 16px; border-radius: 6px; font-size: .75rem; font-weight: 700; border: none; cursor: pointer; background: transparent; color: var(--mut); font-family: inherit; transition: all .2s; }
-  .pill-mode.on { background: var(--mode-on-bg); color: var(--mode-on-txt); }
-  .preset { padding: 4px 12px; border-radius: 999px; font-size: .65rem; font-weight: 700; border: 1px solid var(--pre-off-bdr); background: transparent; color: var(--mut); cursor: pointer; font-family: inherit; transition: all .2s; }
-  .preset.on { border-color: var(--pre-on-bdr); background: var(--accent-dim); color: var(--accent); }
-  .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: .7rem; font-weight: 600; border: 1px solid var(--inp-bdr); background: var(--inp-bg); color: var(--mut); cursor: pointer; font-family: inherit; }
+/* FX bar */
+.fx{background:var(--raised);border-bottom:1px solid var(--bdr);padding:.65rem 1.5rem;margin:0 -1.5rem 0}
+.fxi{max-width:620px;margin:0 auto;display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
+.fxl{font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);flex-shrink:0}
+.fxg{display:flex;align-items:center;gap:.3rem;background:var(--inp-bg);border:1px solid var(--inp-bdr);border-radius:32px;padding:5px 14px;transition:border .2s}
+.fxg:focus-within{border-color:var(--acc)}
+.fxg input{background:transparent;border:none;outline:none;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:500;color:var(--pri);width:56px;text-align:right}
+.fxg select{background:transparent;border:none;outline:none;font-family:'Outfit',sans-serif;font-size:.7rem;font-weight:600;color:var(--acc);cursor:pointer;padding:2px}
+.fxeq{color:var(--faint);font-size:.82rem;font-weight:300}
+.fxr{font-family:'Fraunces',serif;font-size:.95rem;color:var(--pri);font-weight:600}
+.fxrt{font-size:.58rem;color:var(--mut);margin-left:.3rem}
+.pill-btn{font-family:'Outfit',sans-serif;font-size:.6rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:6px 18px;border-radius:32px;border:none;background:var(--acc);color:#fff;cursor:pointer;transition:all .2s;flex-shrink:0}
+.pill-btn:hover{opacity:.85}
+.pill-btn:disabled{opacity:.4;cursor:not-allowed}
+.fxrs{display:flex;align-items:center;gap:.55rem;margin-top:.35rem;flex-wrap:wrap}
+.fxre{display:flex;align-items:center;gap:.2rem;font-size:.6rem;color:var(--mut)}
+.fxre input{background:transparent;border:none;border-bottom:1px solid var(--inp-bdr);outline:none;font-family:'Outfit',sans-serif;font-size:.64rem;font-weight:500;color:var(--txt);width:40px;text-align:right;padding:1px 0;transition:border .2s}
+.fxre input:focus{border-color:var(--acc)}
 
-  /* Inputs */
-  input[type="text"], input[type="number"], select {
-    background: var(--inp-bg); border: 1px solid var(--inp-bdr); border-radius: 8px;
-    padding: 6px 12px; font-size: .75rem; color: var(--inp-txt); font-family: inherit;
-    font-weight: 600; outline: none; transition: border .2s;
-  }
-  input:focus, select:focus { border-color: var(--accent); }
-  .big-input { background: transparent; border: none; font-size: 2rem; font-weight: 700; color: var(--pri); width: 100%; outline: none; font-family: inherit; }
-  @media(min-width:640px) { .big-input { font-size: 2.5rem; } }
+/* Header */
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin-top:2.5rem;margin-bottom:2.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--bdr)}
+.hdr h1{font-family:'Outfit',sans-serif;font-size:1.8rem;font-weight:300;color:var(--pri);letter-spacing:-.02em;line-height:1}
+.hdr h1 b{font-weight:600;color:var(--acc)}
+.hsub{font-size:.82rem;color:var(--txt);margin-top:.35rem;font-weight:300;letter-spacing:.02em}
+.tb{font-size:.6rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 20px;border-radius:40px;border:none;background:var(--ghost);color:var(--pri);cursor:pointer;transition:all .2s;white-space:nowrap;font-family:'Outfit',sans-serif}
+.tb:hover{background:rgba(205,221,255,.25)}
 
-  /* Table */
-  table { width: 100%; border-collapse: collapse; font-size: .8rem; }
-  th { text-align: left; color: var(--mut); font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: .75rem 1rem; border-bottom: 1px solid var(--bdr); }
-  th.r { text-align: right; }
-  td { padding: .7rem 1rem; border-bottom: 1px solid var(--bdr); }
-  td.r { text-align: right; }
-  tr:hover { background: var(--hover-row); }
-  tr.custom { background: var(--accent-dim); }
+/* Section */
+.sl{font-size:.56rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--acc);margin-bottom:.65rem;display:flex;align-items:center;gap:.5rem}
+.sl::after{content:'';flex:1;height:1px;background:var(--bdr)}
 
-  /* Heat badges */
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: .7rem; font-weight: 700; }
-  .h1 { background: #d1fae5; color: #065f46; } .h2 { background: #ecfdf5; color: #065f46; }
-  .h3 { background: #f0f9ff; color: #0369a1; } .h4 { background: #fffbeb; color: #92400e; }
-  .h5 { background: #fff7ed; color: #9a3412; } .h6 { background: #fef2f2; color: #991b1b; }
-  .f1 { color: #059669; } .f2 { color: #10b981; } .f3 { color: #0284c7; }
-  .f4 { color: #d97706; } .f5 { color: #ea580c; } .f6 { color: #dc2626; }
+/* Entry */
+.en{background:var(--raised);border:1px solid var(--bdr);border-radius:4px;padding:1.6rem;margin-bottom:2.5rem}
+.fld{margin-bottom:1.4rem}.fld:last-child{margin-bottom:0}
+.fl{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txt);margin-bottom:.5rem}
+.ir{display:flex;align-items:center;gap:.6rem;background:var(--inp-bg);border:1px solid var(--inp-bdr);border-radius:32px;padding:.65rem 1.1rem;transition:border .2s}
+.ir:focus-within{border-color:var(--acc)}
+.is{font-family:'Fraunces',serif;font-size:1.3rem;color:var(--txt);flex-shrink:0;line-height:1}
+.ii{flex:1;background:transparent;border:none;outline:none;font-family:'Outfit',sans-serif;font-size:1.35rem;font-weight:300;color:var(--pri);min-width:0;letter-spacing:.01em}
+.ii::placeholder{color:var(--faint)}
+.cs{font-family:'Outfit',sans-serif;font-size:.7rem;font-weight:600;background:var(--surface);border:1px solid var(--bdr);border-radius:32px;padding:6px 14px;color:var(--txt);outline:none;cursor:pointer;flex-shrink:0}
+.cs:focus{border-color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.chip{font-size:.62rem;font-weight:500;letter-spacing:.04em;padding:5px 16px;border-radius:32px;border:1px solid var(--bdr);background:transparent;color:var(--txt);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif}
+.chip:hover{border-color:var(--acc);color:var(--acc)}
+.chip.on{border-color:var(--acc);background:var(--acc-soft);color:var(--acc)}
+.fdiv{height:1px;background:var(--bdr);margin:0 0 1.4rem}
 
-  .collapse-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: none; border: none; color: var(--mut); cursor: pointer; font-family: inherit; }
-  .section { padding: 0 1rem 1.25rem; }
-  .divider { border-top: 1px solid var(--bdr); padding-top: 1rem; margin-top: 1rem; }
-  .arrow { font-size: .7rem; color: var(--fnt); font-weight: 700; }
-  .hide { display: none; }
-  .legend { display: flex; flex-wrap: wrap; gap: .75rem; font-size: .65rem; color: var(--fnt); padding-bottom: 2rem; }
-  .legend span { display: flex; align-items: center; gap: 6px; }
-  .legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
-  .sweet { color: #10b981; font-weight: 700; }
-  .warn { color: #f59e0b; font-weight: 700; }
-  a.skip { display: none; }
-  .rate-row { display: flex; align-items: center; gap: .5rem; background: var(--inp-bg); border: 1px solid var(--inp-bdr); border-radius: 8px; padding: 6px 12px; }
-  .rate-row input { background: transparent; border: none; width: 5rem; font-size: .8rem; }
-  .freq-group { display: flex; flex-wrap: wrap; gap: 4px; }
-  .freq-pill { padding: 5px 10px; border-radius: 6px; font-size: .65rem; font-weight: 700; border: 1px solid var(--inp-bdr); background: transparent; color: var(--mut); cursor: pointer; font-family: inherit; transition: all .2s; }
-  .freq-pill.on { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
-  @media(max-width:639px) { .hide-mobile { display: none !important; } }
+/* Summary */
+.su{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem;margin-bottom:2.5rem}
+@media(min-width:500px){.su{grid-template-columns:repeat(4,1fr)}}
+.sc{background:var(--raised);border:1px solid var(--bdr);border-radius:4px;padding:.85rem 1rem;position:relative;overflow:hidden;transition:background .2s}
+.sc:hover{background:var(--surface)}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--bdr);transition:background .2s}
+.sc.m::before{background:var(--acc)}
+.sk{font-size:.52rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--txt);margin-bottom:.3rem}
+.sv{font-family:'Fraunces',serif;font-size:1.12rem;color:var(--pri);line-height:1.15;font-weight:600}
+.ss{font-size:.62rem;color:var(--mut);margin-top:.2rem;font-weight:400}
+.sv.ey{color:var(--faint);font-size:.95rem;font-weight:400}
+
+/* Table */
+.tw{background:var(--raised);border:1px solid var(--bdr);border-radius:4px;overflow:hidden}
+.tt{padding:.95rem 1.3rem;border-bottom:1px solid var(--bdr)}
+.ttt{font-family:'Outfit',sans-serif;font-size:.88rem;color:var(--pri);font-weight:300;letter-spacing:.01em}
+.ttt b{font-weight:600}
+.tts{font-size:.7rem;color:var(--txt);margin-top:.1rem;font-weight:400}
+table{width:100%;border-collapse:collapse}
+th{font-size:.54rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txt);padding:.7rem 1.3rem;text-align:left;border-bottom:1px solid var(--bdr)}
+th.r{text-align:right}
+td{padding:.72rem 1.3rem;border-bottom:1px solid var(--bdr);font-size:.82rem;transition:background .15s}
+td.r{text-align:right}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface)}
+tr.hl td{background:var(--acc-med)}
+tr.hl:hover td{background:var(--acc-med)}
+.pv{font-family:'Fraunces',serif;font-size:.88rem;color:var(--pri);font-weight:600}
+.pf{font-size:.58rem;color:var(--txt);margin-left:5px;font-weight:500}
+.nv{font-family:'Fraunces',serif;font-size:.92rem;color:var(--pri);font-weight:600}
+.badge{font-family:'Outfit',sans-serif;display:inline-block;padding:3px 12px;border-radius:32px;font-size:.58rem;font-weight:600;letter-spacing:.03em}
+.g1{background:var(--bg1);color:var(--bt1)}.g2{background:var(--bg2);color:var(--bt2)}
+.bb{background:var(--bgb);color:var(--btb)}.yy{background:var(--bgy);color:var(--bty)}
+.oo{background:var(--bgo);color:var(--bto)}.rr{background:var(--bgr);color:var(--btr)}
+.er td{color:var(--faint);text-align:center;font-style:italic;padding:1.2rem;font-size:.82rem}
+
+/* AI Ideas section */
+.ai-section{margin-top:2.5rem}
+.ai-trigger{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.ai-trigger .pill-btn{padding:8px 22px;font-size:.65rem}
+.ai-key-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem}
+.ai-key-input{flex:1;background:var(--inp-bg);border:1px solid var(--inp-bdr);border-radius:32px;padding:7px 16px;font-family:'Outfit',sans-serif;font-size:.72rem;font-weight:500;color:var(--pri);outline:none;transition:border .2s}
+.ai-key-input::placeholder{color:var(--faint)}
+.ai-key-input:focus{border-color:var(--acc)}
+.ai-status{font-size:.62rem;color:var(--mut);margin-bottom:.75rem;min-height:1.2em}
+.ai-card{background:var(--raised);border:1px solid var(--bdr);border-radius:4px;padding:1.25rem;margin-bottom:.75rem;position:relative;overflow:hidden}
+.ai-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc);border-radius:4px 0 0 4px}
+.ai-card h3{font-family:'Outfit',sans-serif;font-size:.88rem;font-weight:600;color:var(--pri);margin-bottom:.4rem;padding-left:.5rem}
+.ai-card p{font-size:.78rem;color:var(--txt);line-height:1.55;padding-left:.5rem}
+.ai-card .ai-tag{display:inline-block;font-size:.55rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 10px;border-radius:32px;background:var(--acc-soft);color:var(--acc);margin-right:.4rem;margin-top:.4rem}
+.ai-card .ai-meta{padding-left:.5rem;margin-top:.5rem}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.loading{animation:pulse 1.2s ease-in-out infinite}
 </style>
 </head>
 <body>
-<div class="mx" id="app"></div>
+
+<!-- FX BAR -->
+<div class="fx a d1">
+  <div class="fxi">
+    <span class="fxl">Convert</span>
+    <div class="fxg"><input id="fxA" type="text" value="1000" oninput="fxC()"><select id="fxF" onchange="fxC()"><option value="USD">USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="AED">AED</option><option value="INR">INR</option></select></div>
+    <span class="fxeq">=</span>
+    <span class="fxr" id="fxR">₹85,000</span>
+    <span class="fxrt" id="fxRt">@ ₹85/USD</span>
+    <button class="pill-btn" onclick="fxApply()">↓ Use as goal</button>
+  </div>
+  <div class="fxi fxrs">
+    <span class="fxl" style="opacity:.5">Rates</span>
+    <div class="fxre">1 USD = ₹<input id="r_USD" value="85" oninput="fxC()"></div>
+    <div class="fxre">1 GBP = ₹<input id="r_GBP" value="110" oninput="fxC()"></div>
+    <div class="fxre">1 EUR = ₹<input id="r_EUR" value="95" oninput="fxC()"></div>
+    <div class="fxre">1 AED = ₹<input id="r_AED" value="23.15" oninput="fxC()"></div>
+  </div>
+</div>
+
+<div class="page">
+  <!-- HEADER -->
+  <div class="hdr a d2">
+    <div><h1>Market <b>Scoper</b></h1><div class="hsub">How many customers do I need?</div></div>
+    <button class="tb" id="tBtn" onclick="togT()">☀ Light</button>
+  </div>
+
+  <!-- ENTRY -->
+  <div class="sl a d3">Inputs</div>
+  <div class="en a d3">
+    <div class="fld">
+      <div class="fl">Revenue Goal</div>
+      <div class="ir"><span class="is" id="gSym">₹</span><input class="ii" id="gIn" type="text" placeholder="50,000" inputmode="decimal" oninput="onG(this.value)"><select class="cs" id="cSel" onchange="onC(this.value)"><option value="INR">INR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="AED">AED</option></select></div>
+      <div class="chips" id="gfc"></div>
+    </div>
+    <div class="fdiv"></div>
+    <div class="fld">
+      <div class="fl">Charge per Customer</div>
+      <div class="ir"><span class="is" id="pSym">₹</span><input class="ii" id="pIn" type="text" placeholder="999" inputmode="decimal" oninput="onP(this.value)"></div>
+      <div class="chips" id="cfc"></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="sl a d4">Summary</div>
+  <div class="su a d4" id="summ"></div>
+
+  <!-- TABLE -->
+  <div class="sl a d5">Pricing Scenarios</div>
+  <div class="tw a d5">
+    <div class="tt"><div class="ttt" id="tTitle">Enter your goal and charge to see scenarios</div><div class="tts" id="tSub"></div></div>
+    <table><thead><tr><th>Price per customer</th><th class="r">Customers needed</th><th class="r">Feasibility</th></tr></thead><tbody id="tb"></tbody></table>
+  </div>
+
+  <!-- AI IDEAS -->
+  <div class="ai-section a d6">
+    <div class="sl">AI Business Ideas</div>
+    <div class="en" style="padding:1.25rem">
+      <div class="fl">Groq API Key</div>
+      <div class="ai-key-row">
+        <input class="ai-key-input" id="groqKey" type="password" placeholder="gsk_... (stored locally, never sent anywhere else)">
+      </div>
+      <p style="font-size:.62rem;color:var(--mut);margin-bottom:1rem">Your key stays in your browser's memory only. It's sent directly to Groq's API and nowhere else.</p>
+      <div class="ai-trigger">
+        <button class="pill-btn" id="aiBtn" onclick="getIdeas()" disabled>✦ Suggest Business Ideas</button>
+        <span class="ai-status" id="aiStatus"></span>
+      </div>
+      <div id="aiResults"></div>
+    </div>
+  </div>
+
+</div>
 
 <script>
-const CURR = {
-  INR: { sym: "₹", code: "INR", loc: "en-IN" },
-  USD: { sym: "$", code: "USD", loc: "en-US" },
-  GBP: { sym: "£", code: "GBP", loc: "en-GB" },
-  EUR: { sym: "€", code: "EUR", loc: "de-DE" },
-};
+const SYM={INR:"₹",USD:"$",GBP:"£",EUR:"€",AED:"د.إ"};
+const GF=[{k:"monthly",l:"Monthly"},{k:"annual",l:"Annual"},{k:"onetime",l:"One-time"}];
+const CF=[{k:"weekly",l:"Weekly",pm:52/12},{k:"biweekly",l:"Bi-weekly",pm:26/12},{k:"monthly",l:"Monthly",pm:1},{k:"quarterly",l:"Quarterly",pm:1/3},{k:"halfyear",l:"Half-yearly",pm:1/6},{k:"annual",l:"Annual",pm:1/12},{k:"onetime",l:"One-time",pm:1/12}];
+const MUL=[.2,.33,.5,.75,1,1.5,2,3,5,10];
+const PER={weekly:"/ wk",biweekly:"/ 2wk",monthly:"/ mo",quarterly:"/ qtr",halfyear:"/ 6mo",annual:"/ yr",onetime:" once"};
+let S={goal:null,gf:"monthly",price:null,cf:"monthly",cur:"INR"};
 
-const FREQ = {
-  weekly:    { label: "Weekly",    mult: 52/12, per: "/ week" },
-  biweekly:  { label: "Bi-weekly", mult: 26/12, per: "/ 2 weeks" },
-  monthly:   { label: "Monthly",   mult: 1,     per: "/ month" },
-  quarterly: { label: "Quarterly", mult: 1/3,   per: "/ quarter" },
-  halfyearly:{ label: "Half-yearly", mult: 1/6, per: "/ 6 months" },
-  annual:    { label: "Annual",    mult: 1/12,  per: "/ year" },
-  onetime:   { label: "One-time",  mult: 1/12,  per: " (one-time)" },
-};
+function rates(){return{INR:1,USD:pf("r_USD")||85,GBP:pf("r_GBP")||110,EUR:pf("r_EUR")||95,AED:pf("r_AED")||23.15}}
+function pf(id){return parseFloat(document.getElementById(id).value)}
+function fmt(v){const s=SYM[S.cur]||"₹";if(S.cur==="INR"){if(v>=1e7)return s+(v/1e7).toFixed(2)+" Cr";if(v>=1e5)return s+(v/1e5).toFixed(1)+" L";return s+Math.round(v).toLocaleString("en-IN")}if(v>=1e6)return s+(v/1e6).toFixed(1)+"M";if(v>=1e3)return s+(v/1e3).toFixed(1)+"K";return s+Math.round(v).toLocaleString()}
+function mr(){if(!S.goal)return null;return S.gf==="monthly"?S.goal:S.goal/12}
+function rpc(p){return p*(CF.find(f=>f.k===S.cf)||CF[2]).pm}
+function bg(n){if(n<=5)return["g1","Very doable"];if(n<=20)return["g2","Doable"];if(n<=50)return["bb","Moderate"];if(n<=100)return["yy","Ambitious"];if(n<=500)return["oo","Hard"];return["rr","Very hard"]}
 
-const MONTHLY_PRICES_INR = [100,250,499,999,1499,1999,2999,4999,9999,14999,24999,49999];
-const LUMPSUM_PRICES_INR = [499,999,2499,4999,9999,19999,49999,99999,199999,499999];
-const PRESETS_INR = {
-  monthly: [{l:"₹25K/mo",v:25000},{l:"₹50K/mo",v:50000},{l:"₹1L/mo",v:100000},{l:"₹2.5L/mo",v:250000},{l:"₹5L/mo",v:500000},{l:"₹10L/mo",v:1000000}],
-  annual: [{l:"₹5L/yr",v:500000},{l:"₹10L/yr",v:1000000},{l:"₹25L/yr",v:2500000},{l:"₹50L/yr",v:5000000},{l:"₹1Cr/yr",v:10000000},{l:"₹5Cr/yr",v:50000000}],
-};
+// FX
+function fxC(){const r=rates();const a=parseFloat((document.getElementById("fxA").value||"0").replace(/[^0-9.]/g,""));const f=document.getElementById("fxF").value;if(isNaN(a)){document.getElementById("fxR").textContent="—";document.getElementById("fxRt").textContent="";return}const inr=a*r[f];document.getElementById("fxR").textContent=f==="INR"?Object.keys(SYM).filter(k=>k!=="INR").slice(0,2).map(k=>SYM[k]+Math.round(inr/r[k]).toLocaleString()).join(" · "):"₹"+Math.round(inr).toLocaleString("en-IN");document.getElementById("fxRt").textContent=f==="INR"?"":"@ ₹"+r[f]+"/"+f}
+function fxApply(){const r=rates();const a=parseFloat((document.getElementById("fxA").value||"0").replace(/[^0-9.]/g,""));const f=document.getElementById("fxF").value;if(isNaN(a)||!a)return;const gv=Math.round(a*r[f]/r[S.cur]);S.goal=gv;document.getElementById("gIn").value=gv.toLocaleString(S.cur==="INR"?"en-IN":"en-US");render()}
 
-let state = {
-  theme: "dark", mode: "monthly", freq: "monthly", cur: "INR",
-  targetINR: 50000, inputVal: "50000",
-  rates: { INR:1, USD:85, GBP:110, EUR:95 },
-  customPrices: [], customInput: "",
-  showFx: false,
-  convFrom: "USD", convTo: "INR", convAmt: "1000",
-};
+// Render
+function render(){
+  const m=mr();const per=PER[S.cf]||"/ mo";const ready=m>0&&S.price>0;
+  // Enable/disable AI button
+  document.getElementById("aiBtn").disabled=!ready;
 
-const $ = s => document.querySelector(s);
-const toINR = (v,c) => v * state.rates[c];
-const fromINR = (v,c) => v / state.rates[c];
-
-function fmt(val, cur) {
-  const cm = CURR[cur];
-  if (val>=1e7 && cur==="INR") return cm.sym+(val/1e7).toFixed(2)+" Cr";
-  if (val>=1e5 && cur==="INR") return cm.sym+(val/1e5).toFixed(2)+" L";
-  if (val>=1e6) return cm.sym+(val/1e6).toFixed(1)+"M";
-  if (val>=1e3) return cm.sym+(val/1e3).toFixed(val>=1e4?0:1)+"K";
-  return cm.sym+Math.round(val).toLocaleString(cm.loc);
+  if(ready){
+    const base=Math.ceil(m/rpc(S.price));const mrr=rpc(S.price)*base;
+    document.getElementById("summ").innerHTML=[
+      {k:"Customers",v:base.toLocaleString(),s:"at "+fmt(S.price)+per,m:true},
+      {k:"MRR",v:fmt(mrr),s:"monthly recurring"},
+      {k:"ARR",v:fmt(mrr*12),s:"annual recurring"},
+      {k:"Daily",v:fmt(mrr/30),s:"per day equiv."},
+    ].map(c=>`<div class="sc${c.m?" m":""}"><div class="sk">${c.k}</div><div class="sv">${c.v}</div><div class="ss">${c.s}</div></div>`).join("");
+    let gd=S.gf==="monthly"?fmt(S.goal)+"/mo":S.gf==="annual"?fmt(S.goal)+"/yr":fmt(S.goal)+" total";
+    document.getElementById("tTitle").innerHTML="Goal: <b>"+gd+"</b>";
+    document.getElementById("tSub").textContent="Your price highlighted · explore different price points";
+    document.getElementById("tb").innerHTML=MUL.map(x=>{const p=Math.round(S.price*x);if(p<1)return"";const c=Math.ceil(m/rpc(p));const[bc,bl]=bg(c);return`<tr class="${x===1?"hl":""}"><td><span class="pv">${fmt(p)}</span><span class="pf">${per}</span></td><td class="r"><span class="nv">${c.toLocaleString()}</span></td><td class="r"><span class="badge ${bc}">${bl}</span></td></tr>`}).join("");
+  } else {
+    document.getElementById("summ").innerHTML=[{k:"Customers"},{k:"MRR"},{k:"ARR"},{k:"Daily"}].map(c=>`<div class="sc"><div class="sk">${c.k}</div><div class="sv ey">—</div><div class="ss">&nbsp;</div></div>`).join("");
+    document.getElementById("tTitle").textContent=m>0?"Enter your charge to see scenarios":"Enter your goal and charge to see scenarios";
+    document.getElementById("tSub").textContent="";
+    let ph="";for(let i=0;i<6;i++)ph+=`<tr class="er"><td colspan="3">${i===2?"Waiting for inputs…":""}</td></tr>`;
+    document.getElementById("tb").innerHTML=ph;
+  }
 }
-function fmtF(val,cur) { return CURR[cur].sym+Math.round(val).toLocaleString(CURR[cur].loc); }
 
-function heatCls(n) { return n<=5?"h1":n<=20?"h2":n<=50?"h3":n<=100?"h4":n<=500?"h5":"h6"; }
-function feasCls(n) { return n<=5?"f1":n<=20?"f2":n<=50?"f3":n<=100?"f4":n<=500?"f5":"f6"; }
-function feasLbl(n) { return n<=5?"Very doable":n<=20?"Doable":n<=50?"Moderate":n<=100?"Ambitious":n<=500?"Hard":"Very hard"; }
+// Chips
+function chips(id,arr,cur,fn){document.getElementById(id).innerHTML=arr.map(f=>`<button class="chip${cur===f.k?" on":""}" onclick="${fn}('${f.k}')">${f.l}</button>`).join("")}
+function bld(){chips("gfc",GF,S.gf,"sgf");chips("cfc",CF,S.cf,"scf")}
+function onG(v){S.goal=parseFloat(v.replace(/[^0-9.]/g,""))||null;render()}
+function onP(v){S.price=parseFloat(v.replace(/[^0-9.]/g,""))||null;render()}
+function onC(c){S.cur=c;document.getElementById("gSym").textContent=SYM[c]||c;document.getElementById("pSym").textContent=SYM[c]||c;render()}
+function sgf(f){S.gf=f;bld();render()}
+function scf(f){S.cf=f;bld();render()}
+function togT(){const h=document.documentElement;const d=h.getAttribute("data-t")==="dark";h.setAttribute("data-t",d?"light":"dark");document.getElementById("tBtn").textContent=d?"● Dark":"☀ Light"}
 
-function render() {
-  const s = state, c = CURR[s.cur], target = fromINR(s.targetINR, s.cur);
-  const freqObj = FREQ[s.freq];
-  const basePrices = s.mode === "monthly" ? MONTHLY_PRICES_INR : LUMPSUM_PRICES_INR;
-  const allPrices = [...basePrices, ...s.customPrices].sort((a,b)=>a-b);
+// ─── GROQ AI IDEAS ───
+async function getIdeas(){
+  const key=document.getElementById("groqKey").value.trim();
+  if(!key){document.getElementById("aiStatus").textContent="Please enter your Groq API key above.";return}
 
-  // Each row: price is per-frequency-unit. Revenue target is monthly internally.
-  // For recurring: pricePerMonth = pricePerFreq * freq.mult. customers = targetINR / pricePerMonth
-  // For lump sum: customers = targetINR(annual) / priceINR
-  const rows = allPrices.map(priceINR => {
-    let customers;
-    if (s.mode === "monthly") {
-      const pricePerMonth = priceINR * freqObj.mult;
-      customers = Math.ceil(s.targetINR / pricePerMonth);
-    } else {
-      customers = Math.ceil(s.targetINR / priceINR);
+  const m=mr();if(!m||!S.price)return;
+  const per=PER[S.cf]||"/ mo";
+  const cfo=CF.find(f=>f.k===S.cf)||CF[2];
+  const base=Math.ceil(m/rpc(S.price));
+  const sym=SYM[S.cur];
+
+  const prompt=`You are a business strategist helping a solo founder / bootstrapped entrepreneur brainstorm micro-SaaS and digital product ideas.
+
+Context:
+- Revenue goal: ${sym}${S.goal.toLocaleString()} ${S.gf==="monthly"?"per month":"per year"}
+- Price per customer: ${sym}${S.price.toLocaleString()} ${per}
+- Customers needed: ~${base}
+- Currency: ${S.cur}
+- The founder wants to build in India and sell globally (hard-currency revenue preferred: USD, GBP, EUR, AED)
+
+Give me exactly 4 concrete, specific business ideas that fit this exact price point and customer count. For each idea:
+1. A short punchy name (3-5 words)
+2. What it is (2-3 sentences, be specific not generic)
+3. Why this price point works for this product
+4. Target customer type
+5. One or two tags like "micro-saas", "api", "b2b", "b2c", "marketplace", "tool", "content", "community"
+
+Respond ONLY in valid JSON array format, no markdown, no backticks:
+[{"name":"...","description":"...","why_price":"...","target":"...","tags":["...",".."]}]`;
+
+  const btn=document.getElementById("aiBtn");
+  const status=document.getElementById("aiStatus");
+  const results=document.getElementById("aiResults");
+
+  btn.disabled=true;
+  status.innerHTML='<span class="loading">Thinking…</span>';
+  results.innerHTML="";
+
+  try{
+    const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},
+      body:JSON.stringify({
+        model:"llama-3.3-70b-versatile",
+        messages:[{role:"user",content:prompt}],
+        temperature:0.8,
+        max_tokens:1500
+      })
+    });
+
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      throw new Error(err.error?.message||"API error "+res.status);
     }
-    return { priceINR, priceDisp: fromINR(priceINR, s.cur), customers, isCustom: s.customPrices.includes(priceINR) };
-  });
 
-  const monthlyEquiv = s.mode === "annual" ? s.targetINR / 12 : null;
-  const convNum = parseFloat((s.convAmt||"0").replace(/,/g,""));
-  const convResult = !isNaN(convNum) ? (convNum * s.rates[s.convFrom]) / s.rates[s.convTo] : 0;
+    const data=await res.json();
+    const text=data.choices?.[0]?.message?.content||"";
+    const clean=text.replace(/```json|```/g,"").trim();
+    const ideas=JSON.parse(clean);
 
-  const presets = PRESETS_INR[s.mode];
-
-  document.documentElement.setAttribute("data-theme", s.theme);
-
-  let html = `
-  <!-- HEADER -->
-  <div class="flex between wrap gap-4" style="margin-bottom:2rem">
-    <div>
-      <h1>Market Scoper</h1>
-      <p class="sub">Revenue → Customers × Price breakdown</p>
-    </div>
-    <div class="flex items-center gap-3 wrap">
-      <button class="btn-sm" onclick="toggleTheme()">${s.theme==="dark"?"☀ Light":"● Dark"}</button>
-      <div class="pill-group">
-        ${Object.keys(CURR).map(k=>`<button class="pill ${s.cur===k?"on":""}" onclick="setCur('${k}')">${CURR[k].sym} ${k}</button>`).join("")}
+    results.innerHTML=ideas.map(idea=>`
+      <div class="ai-card">
+        <h3>${esc(idea.name)}</h3>
+        <p>${esc(idea.description)}</p>
+        <p style="margin-top:.4rem;font-size:.72rem;color:var(--acc);padding-left:.5rem"><strong>Why this price:</strong> ${esc(idea.why_price)}</p>
+        <p style="margin-top:.3rem;font-size:.72rem;color:var(--mut);padding-left:.5rem">Target: ${esc(idea.target)}</p>
+        <div class="ai-meta">${(idea.tags||[]).map(t=>`<span class="ai-tag">${esc(t)}</span>`).join("")}</div>
       </div>
-    </div>
-  </div>
+    `).join("");
 
-  <!-- FX PANEL -->
-  <div class="card" style="margin-bottom:1.5rem">
-    <button class="collapse-btn" onclick="toggleFx()">
-      <span class="lbl" style="margin:0">FX Rates & Converter</span>
-      <span class="arrow">${s.showFx?"▲ hide":"▼ show"}</span>
-    </button>
-    <div class="${s.showFx?"section":"hide"}">
-      <p class="val-sm" style="margin-bottom:.75rem">INR per 1 unit — edit to match today's rate. Flows into all calculations.</p>
-      <div class="grid3">
-        ${Object.keys(CURR).filter(k=>k!=="INR").map(k=>`
-          <div class="rate-row">
-            <span class="lbl" style="white-space:nowrap">1 ${k} =</span>
-            <span style="color:var(--fnt);font-size:.75rem">₹</span>
-            <input type="number" value="${s.rates[k]}" step="0.01" onchange="setRate('${k}',this.value)">
-          </div>
-        `).join("")}
-      </div>
-      <div class="divider">
-        <p class="lbl" style="margin-bottom:.75rem">Quick Convert</p>
-        <div class="flex wrap items-center gap-2">
-          <input type="text" value="${s.convAmt}" oninput="state.convAmt=this.value;render()" style="width:7rem">
-          <select onchange="state.convFrom=this.value;render()">
-            ${Object.keys(CURR).map(k=>`<option value="${k}" ${s.convFrom===k?"selected":""}>${k}</option>`).join("")}
-          </select>
-          <span style="color:var(--fnt);font-weight:700">→</span>
-          <select onchange="state.convTo=this.value;render()">
-            ${Object.keys(CURR).map(k=>`<option value="${k}" ${s.convTo===k?"selected":""}>${k}</option>`).join("")}
-          </select>
-          <span style="font-size:1.1rem;font-weight:700;color:var(--pri)">= ${fmtF(Math.round(convResult*100)/100, s.convTo)}</span>
-        </div>
-        <p class="val-sm" style="margin-top:.5rem">Rate: 1 ${s.convFrom} = ${(s.rates[s.convFrom]/s.rates[s.convTo]).toFixed(4)} ${s.convTo}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODE TOGGLE -->
-  <div class="pill-group" style="margin-bottom:1.5rem">
-    <button class="pill-mode ${s.mode==="monthly"?"on":""}" onclick="setMode('monthly')">Monthly Recurring</button>
-    <button class="pill-mode ${s.mode==="annual"?"on":""}" onclick="setMode('annual')">Annual / Lump Sum</button>
-  </div>
-
-  <!-- PRICING FREQUENCY (only for recurring) -->
-  ${s.mode === "monthly" ? `
-  <div class="card" style="padding:1rem;margin-bottom:1.5rem">
-    <p class="lbl" style="margin-bottom:.5rem">Pricing Frequency</p>
-    <p class="val-sm" style="margin-bottom:.75rem">How often does the customer pay? Price tiers below are per this period.</p>
-    <div class="freq-group">
-      ${Object.keys(FREQ).filter(k=>k!=="onetime").map(k=>`<button class="freq-pill ${s.freq===k?"on":""}" onclick="setFreq('${k}')">${FREQ[k].label}</button>`).join("")}
-    </div>
-  </div>` : ""}
-
-  <!-- TARGET INPUT -->
-  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
-    <p class="lbl" style="margin-bottom:.75rem">${s.mode==="monthly"?"Target Monthly Revenue":"Target Annual Revenue"}</p>
-    <div class="flex items-center gap-3">
-      <span style="font-size:1.5rem;color:var(--fnt);font-weight:700">${c.sym}</span>
-      <input class="big-input" type="text" value="${s.inputVal}" oninput="handleTarget(this.value)">
-      <span style="color:var(--fnt);font-size:.8rem;white-space:nowrap">${s.mode==="monthly"?"/ month":"/ year"}</span>
-    </div>
-    ${s.mode==="annual" && monthlyEquiv ? `
-    <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bdr)">
-      <span class="sub">= ${fmtF(fromINR(monthlyEquiv,s.cur),s.cur)} <span style="color:var(--fnt)">/ month</span></span>
-    </div>` : ""}
-    <div class="flex wrap gap-2" style="margin-top:1rem">
-      ${presets.map(p=>`<button class="preset ${s.targetINR===p.v?"on":""}" onclick="applyPreset(${p.v})">${s.cur==="INR"?p.l:fmt(fromINR(p.v,s.cur),s.cur)+(s.mode==="monthly"?"/mo":"/yr")}</button>`).join("")}
-    </div>
-  </div>
-
-  <!-- SUMMARY CARDS -->
-  <div class="grid4" style="margin-bottom:1.5rem">
-    <div class="card" style="padding:.75rem">
-      <div class="lbl">Target</div>
-      <div class="val-lg">${fmtF(target,s.cur)}</div>
-      <div class="val-sm">${s.mode==="monthly"?"per month":"per year"}</div>
-    </div>
-    <div class="card" style="padding:.75rem">
-      <div class="lbl">In INR</div>
-      <div class="val-lg">${fmt(s.targetINR,"INR")}</div>
-      <div class="val-sm">${s.cur!=="INR"?"@ ₹"+s.rates[s.cur]+"/"+c.code:"base"}</div>
-    </div>
-    <div class="card" style="padding:.75rem">
-      <div class="lbl">${s.mode==="monthly"?"Annual":"Monthly"}</div>
-      <div class="val-lg">${fmt(fromINR(s.mode==="monthly"?s.targetINR*12:s.targetINR/12,s.cur),s.cur)}</div>
-      <div class="val-sm">${s.mode==="monthly"?"per year":"per month"}</div>
-    </div>
-    <div class="card" style="padding:.75rem">
-      <div class="lbl">Daily Equiv.</div>
-      <div class="val-lg">${fmt(fromINR(s.mode==="monthly"?s.targetINR/30:s.targetINR/365,s.cur),s.cur)}</div>
-      <div class="val-sm">per day</div>
-    </div>
-  </div>
-
-  <!-- BREAKDOWN TABLE -->
-  <div class="card" style="margin-bottom:1.5rem;overflow:hidden">
-    <div style="padding:1rem;border-bottom:1px solid var(--bdr)" class="flex between wrap gap-3">
-      <div>
-        <div class="val-lg" style="font-size:.85rem">${s.mode==="monthly"? (s.freq==="monthly"?"Monthly Subscription Pricing":FREQ[s.freq].label+" Subscription Pricing") :"One-Time / Annual Pricing"}</div>
-        <p class="val-sm" style="margin-top:2px">Customers needed at each price point to hit ${fmt(target,s.cur)}${s.mode==="monthly"?"/mo":"/yr"}</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <input type="text" placeholder="Custom (${c.sym})" value="${s.customInput}" oninput="state.customInput=this.value" onkeydown="if(event.key==='Enter')addCustom()" style="width:7rem">
-        <button class="btn-sm" onclick="addCustom()">Add</button>
-      </div>
-    </div>
-    <div style="overflow-x:auto">
-      <table>
-        <thead><tr>
-          <th>Price ${s.mode==="monthly"?FREQ[s.freq].per:"/ unit"}</th>
-          <th class="r">Customers</th>
-          <th class="r hide-mobile">Feasibility</th>
-          ${s.mode==="monthly" && s.freq!=="monthly" ? `<th class="r hide-mobile">Effective /mo</th>` : ""}
-          <th class="r hide-mobile">${s.mode==="monthly"?"Annual Rev.":"Rev. / Cust."}</th>
-        </tr></thead>
-        <tbody>
-          ${rows.map(r=>{
-            const fc = feasCls(r.customers);
-            const effectiveMonthly = r.priceINR * freqObj.mult;
-            return `<tr class="${r.isCustom?"custom":""}">
-              <td><strong style="color:var(--pri)">${fmtF(r.priceDisp,s.cur)}</strong>${r.isCustom?` <span style="color:var(--accent);font-size:.7rem">★</span>`:""}</td>
-              <td class="r"><span class="badge ${heatCls(r.customers)}">${r.customers.toLocaleString()}</span></td>
-              <td class="r hide-mobile"><span class="${fc}" style="font-size:.7rem;font-weight:700">${feasLbl(r.customers)}</span></td>
-              ${s.mode==="monthly" && s.freq!=="monthly" ? `<td class="r hide-mobile" style="color:var(--mut);font-size:.7rem">${fmt(fromINR(effectiveMonthly,s.cur),s.cur)}</td>` : ""}
-              <td class="r hide-mobile" style="color:var(--mut);font-size:.7rem">${s.mode==="monthly"? fmt(fromINR(effectiveMonthly*r.customers*12,s.cur),s.cur) : fmtF(r.priceDisp,s.cur)}</td>
-            </tr>`;
-          }).join("")}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- INSIGHT -->
-  <div class="card" style="padding:1.25rem;margin-bottom:1.5rem">
-    <p class="lbl" style="margin-bottom:.75rem">Quick Insight</p>
-    <div style="font-size:.8rem;color:var(--txt)">
-      ${rows.filter(r=>r.customers<=10).length>0 ? `
-        <p><span class="sweet">Sweet spot:</span> At ${fmtF(rows.filter(r=>r.customers<=10).slice(-1)[0]?.priceDisp,s.cur)}+${s.mode==="monthly"?FREQ[s.freq].per:""} per ${s.mode==="monthly"?"subscription":"sale"}, you need <strong style="color:var(--pri)">≤10 customers</strong> to hit target.${s.mode==="monthly"?" Very achievable for a focused micro-SaaS.":""}</p>
-      ` : `
-        <p><span class="warn">High volume needed:</span> Even at the highest price point, you'd need ${rows[rows.length-1]?.customers}+ customers.</p>
-      `}
-      ${s.cur!=="INR"?`<p class="val-sm" style="margin-top:.5rem">Using: 1 ${c.code} = ₹${s.rates[s.cur]} (editable in FX panel)</p>`:""}
-    </div>
-  </div>
-
-  <!-- LEGEND -->
-  <div class="legend">
-    <span><i class="h1"></i> ≤5</span>
-    <span><i class="h2"></i> 6-20</span>
-    <span><i class="h3"></i> 21-50</span>
-    <span><i class="h4"></i> 51-100</span>
-    <span><i class="h5"></i> 101-500</span>
-    <span><i class="h6"></i> 500+</span>
-  </div>`;
-
-  document.getElementById("app").innerHTML = html;
+    status.textContent="Generated "+ideas.length+" ideas · click again for more";
+  }catch(e){
+    status.textContent="Error: "+e.message;
+    console.error(e);
+  }finally{
+    btn.disabled=false;
+  }
 }
 
-function toggleTheme() { state.theme = state.theme==="dark"?"light":"dark"; render(); }
-function toggleFx() { state.showFx = !state.showFx; render(); }
-function setCur(c) { state.cur=c; state.inputVal=Math.round(fromINR(state.targetINR,c)).toString(); render(); }
-function setMode(m) { state.mode=m; state.freq = m==="monthly"?"monthly":"onetime"; applyPreset(m==="monthly"?50000:1000000); }
-function setFreq(f) { state.freq=f; render(); }
-function handleTarget(v) { state.inputVal=v; const n=parseFloat(v.replace(/,/g,"")); if(!isNaN(n)&&n>0) state.targetINR=toINR(n,state.cur); render(); }
-function applyPreset(v) { state.targetINR=v; state.inputVal=Math.round(fromINR(v,state.cur)).toString(); render(); }
-function setRate(c,v) { const n=parseFloat(v); if(!isNaN(n)&&n>0){ state.rates[c]=n; if(c===state.cur) state.inputVal=Math.round(state.targetINR/n).toString(); } render(); }
-function addCustom() {
-  const n=parseFloat((state.customInput||"").replace(/,/g,""));
-  if(!isNaN(n)&&n>0){ const p=toINR(n,state.cur); if(!state.customPrices.includes(p)) state.customPrices.push(p); state.customInput=""; }
-  render();
-}
+function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
 
-render();
+// Init
+bld();render();fxC();
 </script>
 </body>
 </html>
